@@ -1,0 +1,592 @@
+openapi: 3.0.0
+info:
+  title: Snowflake Cortex Agents API
+  version: 2.0.0
+  description: 'Snowflake Cortex Agents — create/run/manage agent objects and threads. Endpoints: createThread, getThread,
+    agentRun (inline), createAgent, getAgent, deleteAgent, runAgent, agentFeedback.'
+  contact:
+    name: Snowflake, Inc.
+    url: https://snowflake.com
+    email: support@snowflake.com
+servers:
+- url: https://{account}.snowflakecomputing.com
+  description: Snowflake account endpoint
+  variables:
+    account:
+      default: MDTPLC-AWSUSE1P1
+      description: Snowflake account identifier (e.g. MDTPLC-AWSUSE1P1). No '.snowflakecomputing.com' suffix.
+      x-ms-connection-parameter:
+        name: account
+        uiDefinition:
+          displayName: Snowflake Account
+          description: Your Snowflake account identifier (e.g. MDTPLC-AWSUSE1P1)
+          tooltip: Find under Admin > Accounts or run SELECT CURRENT_ACCOUNT() in Snowflake
+          constraints:
+            required: 'true'
+security:
+- SnowflakeOAuth:
+  - session:role:DEV_FDH_PROJ_MGMT_RW
+tags:
+- name: Cortex Agents
+  description: Cortex Agent objects and threads
+paths:
+  /api/v2/cortex/threads:
+    post:
+      operationId: createThread
+      x-ms-summary: Create Thread
+      summary: Create a new conversation thread
+      tags:
+      - Cortex Agents
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                origin_application:
+                  type: string
+                  x-ms-summary: Origin Application
+                  description: App name that created the thread. Max 16 bytes.
+      responses:
+        '200':
+          description: Thread created
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    parameters:
+    - &id001
+      $ref: '#/components/parameters/SnowflakeAuthorizationTokenType'
+    - &id002
+      $ref: '#/components/parameters/SnowflakeRole'
+    - &id003
+      $ref: '#/components/parameters/SnowflakeWarehouse'
+    - &id004
+      $ref: '#/components/parameters/SnowflakeDatabase'
+    - &id005
+      $ref: '#/components/parameters/SnowflakeSchema'
+  /api/v2/cortex/threads/{id}:
+    get:
+      operationId: describeThread
+      x-ms-summary: Get Thread Messages
+      summary: Describe a thread and list its messages
+      tags:
+      - Cortex Agents
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Thread UUID
+        x-ms-summary: Thread ID
+        schema:
+          type: integer
+      - name: page_size
+        in: query
+        required: false
+        description: Number of messages per page (max 100)
+        x-ms-summary: Page Size
+        schema:
+          type: integer
+          default: 20
+          maximum: 100
+      - name: last_message_id
+        in: query
+        required: false
+        description: 'Cursor: return messages after this message ID'
+        x-ms-summary: Last Message ID
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Thread metadata and messages
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/cortex/agent:run:
+    post:
+      operationId: agentRun
+      x-ms-summary: Run Agent (Inline)
+      summary: Run a Cortex Agent without an agent object
+      tags:
+      - Cortex Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - messages
+              properties:
+                messages:
+                  type: array
+                  x-ms-summary: Messages
+                  items:
+                    type: object
+                    additionalProperties: true
+                  description: Conversation messages
+                stream:
+                  type: boolean
+                  default: true
+                  description: Stream response via SSE
+                  x-ms-summary: Stream Response
+                thread_id:
+                  type: integer
+                  description: Optional thread ID for conversation continuity
+                  x-ms-summary: Thread ID
+                parent_message_id:
+                  type: integer
+                  description: Optional parent message ID
+                  x-ms-summary: Parent Message ID
+                tools:
+                  type: array
+                  x-ms-summary: Tools
+                  items:
+                    type: object
+                    additionalProperties: true
+                  description: Tools available to the agent
+                tool_resources:
+                  type: object
+                  additionalProperties: true
+                  x-ms-summary: Tool Resources
+                  description: Resources for tools
+                tool_choice:
+                  type: object
+                  additionalProperties: true
+                  x-ms-summary: Tool Choice
+                  description: Tool selection control
+      responses:
+        '200':
+          description: Agent response (SSE stream or JSON)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/agents:
+    post:
+      operationId: createAgent
+      x-ms-summary: Create Agent
+      summary: Create a Cortex Agent Object
+      tags:
+      - Cortex Agents
+      parameters:
+      - name: database
+        in: path
+        required: true
+        x-ms-summary: Database
+        schema:
+          type: string
+      - name: schema
+        in: path
+        required: true
+        x-ms-summary: Schema
+        schema:
+          type: string
+      - name: createMode
+        in: query
+        required: false
+        x-ms-summary: Create Mode
+        schema:
+          type: string
+          enum:
+          - errorIfExists
+          - orReplace
+          - ifNotExists
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              properties:
+                name:
+                  type: string
+                  x-ms-summary: Agent Name
+                comment:
+                  type: string
+                  x-ms-summary: Comment
+                profile:
+                  type: object
+                  additionalProperties: true
+                  x-ms-summary: Profile
+                models:
+                  type: object
+                  additionalProperties: true
+                  x-ms-summary: Models
+                instructions:
+                  type: object
+                  additionalProperties: true
+                  x-ms-summary: Instructions
+                orchestration:
+                  type: object
+                  additionalProperties: true
+                  x-ms-summary: Orchestration
+                tools:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                  x-ms-summary: Tools
+                tool_resources:
+                  type: object
+                  additionalProperties: true
+                  x-ms-summary: Tool Resources
+      responses:
+        '200':
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/agents/{name}:
+    get:
+      operationId: describeAgent
+      x-ms-summary: Get Agent
+      summary: Describe a Cortex Agent Object
+      tags:
+      - Cortex Agents
+      parameters:
+      - name: database
+        in: path
+        required: true
+        x-ms-summary: Database
+        schema:
+          type: string
+      - name: schema
+        in: path
+        required: true
+        x-ms-summary: Schema
+        schema:
+          type: string
+      - name: name
+        in: path
+        required: true
+        x-ms-summary: Agent Name
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    delete:
+      operationId: deleteAgent
+      x-ms-summary: Delete Agent
+      summary: Delete a Cortex Agent Object
+      tags:
+      - Cortex Agents
+      parameters:
+      - name: database
+        in: path
+        required: true
+        x-ms-summary: Database
+        schema:
+          type: string
+      - name: schema
+        in: path
+        required: true
+        x-ms-summary: Schema
+        schema:
+          type: string
+      - name: name
+        in: path
+        required: true
+        x-ms-summary: Agent Name
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Agent deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/agents/{name}:feedback:
+    post:
+      operationId: agentFeedback
+      x-ms-summary: Submit Agent Feedback
+      summary: Collect feedback about a Cortex Agent response
+      tags:
+      - Cortex Agents
+      parameters:
+      - name: database
+        in: path
+        required: true
+        x-ms-summary: Database
+        schema:
+          type: string
+      - name: schema
+        in: path
+        required: true
+        x-ms-summary: Schema
+        schema:
+          type: string
+      - name: name
+        in: path
+        required: true
+        x-ms-summary: Agent Name
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - positive
+              properties:
+                orig_request_id:
+                  type: string
+                  x-ms-summary: Original Request ID
+                  description: Request ID for the message being rated
+                positive:
+                  type: boolean
+                  x-ms-summary: Positive
+                  description: True for positive feedback
+                feedback_message:
+                  type: string
+                  x-ms-summary: Feedback Message
+                categories:
+                  type: array
+                  items:
+                    type: string
+                  x-ms-summary: Categories
+                thread_id:
+                  type: integer
+                  x-ms-summary: Thread ID
+      responses:
+        '200':
+          description: Feedback submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/agents/{name}:run:
+    post:
+      operationId: agentRunWithObject
+      x-ms-summary: Run Agent
+      summary: Run a Cortex Agent using a named Agent Object
+      tags:
+      - Cortex Agents
+      parameters:
+      - name: database
+        in: path
+        required: true
+        x-ms-summary: Database
+        schema:
+          type: string
+      - name: schema
+        in: path
+        required: true
+        x-ms-summary: Schema
+        schema:
+          type: string
+      - name: name
+        in: path
+        required: true
+        x-ms-summary: Agent Name
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - messages
+              properties:
+                messages:
+                  type: array
+                  x-ms-summary: Messages
+                  items:
+                    type: object
+                    additionalProperties: true
+                stream:
+                  type: boolean
+                  default: true
+                  x-ms-summary: Stream Response
+                thread_id:
+                  type: integer
+                  x-ms-summary: Thread ID
+                parent_message_id:
+                  type: integer
+                  x-ms-summary: Parent Message ID
+                tool_choice:
+                  type: object
+                  additionalProperties: true
+                  x-ms-summary: Tool Choice
+      responses:
+        '200':
+          description: Agent response (SSE stream or JSON)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+components:
+  securitySchemes:
+    SnowflakeOAuth:
+      type: oauth2
+      description: 'Snowflake OAuth 2.0 Authorization Code. Configure client ID/secret from your Snowflake OAuth integration.
+        Scope: session:role:<ROLE>.'
+      flows:
+        authorizationCode:
+          authorizationUrl: https://orgname-accountname.snowflakecomputing.com/oauth/authorize
+          tokenUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-request
+          refreshUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-request
+          x-ms-authorization-url: https://{account}.snowflakecomputing.com/oauth/authorize
+          x-ms-token-url: https://{account}.snowflakecomputing.com/oauth/token-request
+          x-ms-refresh-url: https://{account}.snowflakecomputing.com/oauth/token-request
+          x-ms-revoke-url: https://{account}.snowflakecomputing.com/oauth/token-revoke
+          x-tokenRevocationUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-revoke
+          scopes:
+            session:role:PUBLIC: Access Snowflake with the PUBLIC role
+          x-ms-connection-parameter:
+            name: token
+            uiDefinition:
+              displayName: OAuth Scope
+              description: 'Snowflake session scope. Format: session:role:<ROLE_NAME>'
+              tooltip: Enter the role you want to use, e.g. session:role:MY_ROLE
+              constraints:
+                required: 'true'
+  parameters:
+    SnowflakeAuthorizationTokenType:
+      name: X-Snowflake-Authorization-Token-Type
+      in: header
+      required: true
+      description: Snowflake authorization token type. For OAuth use OAUTH; for PAT use PROGRAMMATIC_ACCESS_TOKEN.
+      x-ms-visibility: advanced
+      x-ms-summary: Token Type
+      schema:
+        type: string
+        enum:
+        - OAUTH
+        - PROGRAMMATIC_ACCESS_TOKEN
+        - KEYPAIR_JWT
+        default: OAUTH
+    SnowflakeRole:
+      name: X-Snowflake-Role
+      in: header
+      required: false
+      description: Snowflake role to use for the request.
+      x-ms-visibility: advanced
+      x-ms-summary: Role
+      schema:
+        type: string
+        default: DEV_FDH_PROJ_MGMT_RW
+      x-ms-connection-parameter:
+        name: role
+        uiDefinition:
+          displayName: Default Role
+          description: Default role sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeWarehouse:
+      name: X-Snowflake-Warehouse
+      in: header
+      required: false
+      description: Snowflake warehouse to use.
+      x-ms-visibility: advanced
+      x-ms-summary: Warehouse
+      schema:
+        type: string
+        default: AGENT_WH
+      x-ms-connection-parameter:
+        name: warehouse
+        uiDefinition:
+          displayName: Default Warehouse
+          description: Default warehouse sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeDatabase:
+      name: X-Snowflake-Database
+      in: header
+      required: false
+      description: Default Snowflake database context.
+      x-ms-visibility: advanced
+      x-ms-summary: Default Database
+      schema:
+        type: string
+        default: DEV_FDH_DB
+      x-ms-connection-parameter:
+        name: database
+        uiDefinition:
+          displayName: Default Database
+          description: Default database sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeSchema:
+      name: X-Snowflake-Schema
+      in: header
+      required: false
+      description: Default Snowflake schema context.
+      x-ms-visibility: advanced
+      x-ms-summary: Default Schema
+      schema:
+        type: string
+        default: PROJ_MGMT
+      x-ms-connection-parameter:
+        name: schema
+        uiDefinition:
+          displayName: Default Schema
+          description: Default schema sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+  schemas: {}

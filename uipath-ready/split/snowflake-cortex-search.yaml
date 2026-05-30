@@ -1,0 +1,847 @@
+openapi: 3.0.0
+info:
+  title: Snowflake Cortex Search API
+  version: 2.0.0
+  description: 'Snowflake Cortex Search — semantic search over structured data. Endpoints: list/create/get/delete search services,
+    query, suggest, suspend, resume, feedback.'
+  contact:
+    name: Snowflake, Inc.
+    url: https://snowflake.com
+    email: support@snowflake.com
+servers:
+- url: https://{account}.snowflakecomputing.com
+  description: Snowflake account endpoint
+  variables:
+    account:
+      default: MDTPLC-AWSUSE1P1
+      description: Snowflake account identifier (e.g. MDTPLC-AWSUSE1P1). No '.snowflakecomputing.com' suffix.
+      x-ms-connection-parameter:
+        name: account
+        uiDefinition:
+          displayName: Snowflake Account
+          description: Your Snowflake account identifier (e.g. MDTPLC-AWSUSE1P1)
+          tooltip: Find under Admin > Accounts or run SELECT CURRENT_ACCOUNT() in Snowflake
+          constraints:
+            required: 'true'
+security:
+- SnowflakeOAuth:
+  - session:role:DEV_FDH_PROJ_MGMT_RW
+tags: []
+paths:
+  /api/v2/databases/{database}/schemas/{schema}/cortex-search-services:
+    get:
+      operationId: search_listCortexSearchServices
+      summary: List cortex search services
+      description: Lists the cortex search services under the database and schema.
+      tags:
+      - cortex-search-service
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - name: like
+        description: Parameter to filter the command output by resource name. Uses case-insensitive pattern matching, with
+          support for SQL wildcard characters.
+        in: query
+        schema:
+          type: string
+        x-ms-summary: Like
+      - name: fromName
+        description: Parameter to enable fetching rows only following the first row whose object name matches the specified
+          string. Case-sensitive and does not have to be the full name.
+        in: query
+        schema:
+          type: string
+        x-ms-summary: Fromname
+      - name: showLimit
+        description: Parameter to limit the maximum number of rows returned by a command.
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 10000
+        x-ms-summary: Showlimit
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '202':
+          description: Response
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '408':
+          description: Response
+        '409':
+          description: Response
+        '410':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: List cortex search services
+    post:
+      operationId: search_createCortexSearchService
+      summary: Create a cortex search service
+      description: Create a cortex search service, with standard create modifiers as query parameters. See the Cortex Search
+        Service component definition for what is required to be provided in the request body.
+      tags:
+      - cortex-search-service
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - name: createMode
+        description: 'Parameter allowing support for different modes of resource creation. Possible values include:
+
+          - `errorIfExists`: Throws an error if you try to create a resource that already exists.
+
+          - `orReplace`: Automatically replaces the existing resource with the current one.
+
+          - `ifNotExists`: Creates a new resource when an alter is requested for a non-existent resource.'
+        in: query
+        schema:
+          type: string
+          enum:
+          - errorIfExists
+          - orReplace
+          - ifNotExists
+          default: errorIfExists
+        x-ms-summary: Createmode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Response
+        '202':
+          description: Response
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '408':
+          description: Response
+        '409':
+          description: Response
+        '410':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Create a cortex search service
+    parameters:
+    - &id001
+      $ref: '#/components/parameters/SnowflakeAuthorizationTokenType'
+    - &id002
+      $ref: '#/components/parameters/SnowflakeRole'
+    - &id003
+      $ref: '#/components/parameters/SnowflakeWarehouse'
+    - &id004
+      $ref: '#/components/parameters/SnowflakeDatabase'
+    - &id005
+      $ref: '#/components/parameters/SnowflakeSchema'
+  /api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{name}:
+    get:
+      operationId: search_fetchCortexSearchService
+      summary: Fetch a cortex search service.
+      description: Fetch a Cortex Search Service.
+      tags:
+      - cortex-search-service
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - name: name
+        description: Identifier (i.e. name) for the resource.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Name
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '202':
+          description: Response
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '408':
+          description: Response
+        '409':
+          description: Response
+        '410':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Fetch a cortex search service.
+    delete:
+      operationId: search_deleteCortexSearchService
+      summary: Delete a cortex search service
+      description: Delete a cortex search service with the given name. If ifExists is used, the operation will succeed even
+        if the object does not exist. Otherwise, there will be a failure if the drop is unsuccessful.
+      tags:
+      - cortex search service
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - name: name
+        description: Identifier (i.e. name) for the resource.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Name
+      - name: ifExists
+        description: 'Parameter that specifies how to handle the request for a resource that does not exist:
+
+          - `true`: The endpoint does not throw an error if the resource does not exist. It returns a 200 success response,
+          but does not take any action on the resource.
+
+          - `false`: The endpoint throws an error if the resource doesn''t exist.'
+        in: query
+        schema:
+          type: boolean
+          default: false
+        x-ms-summary: Ifexists
+      responses:
+        '200':
+          description: Response
+        '202':
+          description: Response
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '408':
+          description: Response
+        '409':
+          description: Response
+        '410':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Delete a cortex search service
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{service_name}:query:
+    post:
+      operationId: search_queryCortexSearchService
+      summary: Query a Cortex Search Service.
+      description: Query a Cortex Search Service to get search results.
+      tags:
+      - cortex-search-service
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - in: path
+        name: service_name
+        required: true
+        schema:
+          type: string
+        description: The name of the Cortex Search Service.
+        x-ms-summary: Service Name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '408':
+          description: Response
+        '409':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Query a Cortex Search Service.
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{service_name}:suggest:
+    post:
+      operationId: search_suggestCortexSearchService
+      summary: Suggest from a Cortex Search Service
+      description: Suggest from a Cortex Search Service to get auto-complete or contextual suggestions
+      tags:
+      - cortex-search-service
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - in: path
+        name: service_name
+        required: true
+        schema:
+          type: string
+        description: The name of the Cortex Search Service
+        x-ms-summary: Service Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '408':
+          description: Response
+        '409':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Suggest from a Cortex Search Service
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{name}:suspend:
+    post:
+      operationId: search_suspendCortexSearchService
+      summary: Suspend a cortex search service.
+      description: Suspends one or both of the indexing or serving targets of a cortex search service.
+      tags:
+      - cortex-search-service
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - name: name
+        description: Identifier (i.e. name) for the resource.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Name
+      - name: ifExists
+        description: 'Parameter that specifies how to handle the request for a resource that does not exist:
+
+          - `true`: The endpoint does not throw an error if the resource does not exist. It returns a 200 success response,
+          but does not take any action on the resource.
+
+          - `false`: The endpoint throws an error if the resource doesn''t exist.'
+        in: query
+        schema:
+          type: boolean
+          default: false
+        x-ms-summary: Ifexists
+      responses:
+        '200':
+          description: Response
+        '202':
+          description: Response
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '408':
+          description: Response
+        '409':
+          description: Response
+        '410':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Suspend a cortex search service.
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{name}:resume:
+    post:
+      operationId: search_resumeCortexSearchService
+      description: Resume the cortex search service
+      summary: Resume the cortex search service
+      tags:
+      - cortex-search-service
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - name: name
+        description: Identifier (i.e. name) for the resource.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Name
+      - name: ifExists
+        description: 'Parameter that specifies how to handle the request for a resource that does not exist:
+
+          - `true`: The endpoint does not throw an error if the resource does not exist. It returns a 200 success response,
+          but does not take any action on the resource.
+
+          - `false`: The endpoint throws an error if the resource doesn''t exist.'
+        in: query
+        schema:
+          type: boolean
+          default: false
+        x-ms-summary: Ifexists
+      responses:
+        '200':
+          description: Response
+        '202':
+          description: Response
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '408':
+          description: Response
+        '409':
+          description: Response
+        '410':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Resume the cortex search service
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{name}:feedback:
+    summary: Create a feedback event for a Cortex Search query result.
+    description: Create a feedback event for a Cortex Search result.
+    post:
+      operationId: search_sendFeedback
+      tags:
+      - cortex-search-service
+      description: Send user feedback for a Cortex Search result
+      parameters:
+      - name: database
+        description: Identifier (i.e. name) for the database to which the resource belongs. You can use the `/api/v2/databases`
+          GET request to get a list of available databases.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Database
+      - name: schema
+        description: Identifier (i.e. name) for the schema to which the resource belongs. You can use the `/api/v2/databases/{database}/schemas`
+          GET request to get a list of available schemas for the specified database.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Schema
+      - name: name
+        description: Identifier (i.e. name) for the resource.
+        required: true
+        in: path
+        schema:
+          type: object
+          additionalProperties: true
+        x-ms-summary: Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Response
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+components:
+  securitySchemes:
+    SnowflakeOAuth:
+      type: oauth2
+      description: 'Snowflake OAuth 2.0 Authorization Code. Configure client ID/secret from your Snowflake OAuth integration.
+        Scope: session:role:<ROLE>.'
+      flows:
+        authorizationCode:
+          authorizationUrl: https://orgname-accountname.snowflakecomputing.com/oauth/authorize
+          tokenUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-request
+          refreshUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-request
+          x-ms-authorization-url: https://{account}.snowflakecomputing.com/oauth/authorize
+          x-ms-token-url: https://{account}.snowflakecomputing.com/oauth/token-request
+          x-ms-refresh-url: https://{account}.snowflakecomputing.com/oauth/token-request
+          x-ms-revoke-url: https://{account}.snowflakecomputing.com/oauth/token-revoke
+          x-tokenRevocationUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-revoke
+          scopes:
+            session:role:PUBLIC: Access Snowflake with the PUBLIC role
+          x-ms-connection-parameter:
+            name: token
+            uiDefinition:
+              displayName: OAuth Scope
+              description: 'Snowflake session scope. Format: session:role:<ROLE_NAME>'
+              tooltip: Enter the role you want to use, e.g. session:role:MY_ROLE
+              constraints:
+                required: 'true'
+  parameters:
+    SnowflakeAuthorizationTokenType:
+      name: X-Snowflake-Authorization-Token-Type
+      in: header
+      required: true
+      description: Snowflake authorization token type. For OAuth use OAUTH; for PAT use PROGRAMMATIC_ACCESS_TOKEN.
+      x-ms-visibility: advanced
+      x-ms-summary: Token Type
+      schema:
+        type: string
+        enum:
+        - OAUTH
+        - PROGRAMMATIC_ACCESS_TOKEN
+        - KEYPAIR_JWT
+        default: OAUTH
+    SnowflakeRole:
+      name: X-Snowflake-Role
+      in: header
+      required: false
+      description: Snowflake role to use for the request.
+      x-ms-visibility: advanced
+      x-ms-summary: Role
+      schema:
+        type: string
+        default: DEV_FDH_PROJ_MGMT_RW
+      x-ms-connection-parameter:
+        name: role
+        uiDefinition:
+          displayName: Default Role
+          description: Default role sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeWarehouse:
+      name: X-Snowflake-Warehouse
+      in: header
+      required: false
+      description: Snowflake warehouse to use.
+      x-ms-visibility: advanced
+      x-ms-summary: Warehouse
+      schema:
+        type: string
+        default: AGENT_WH
+      x-ms-connection-parameter:
+        name: warehouse
+        uiDefinition:
+          displayName: Default Warehouse
+          description: Default warehouse sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeDatabase:
+      name: X-Snowflake-Database
+      in: header
+      required: false
+      description: Default Snowflake database context.
+      x-ms-visibility: advanced
+      x-ms-summary: Default Database
+      schema:
+        type: string
+        default: DEV_FDH_DB
+      x-ms-connection-parameter:
+        name: database
+        uiDefinition:
+          displayName: Default Database
+          description: Default database sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeSchema:
+      name: X-Snowflake-Schema
+      in: header
+      required: false
+      description: Default Snowflake schema context.
+      x-ms-visibility: advanced
+      x-ms-summary: Default Schema
+      schema:
+        type: string
+        default: PROJ_MGMT
+      x-ms-connection-parameter:
+        name: schema
+        uiDefinition:
+          displayName: Default Schema
+          description: Default schema sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+  schemas: {}

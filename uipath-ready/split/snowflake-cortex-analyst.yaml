@@ -1,0 +1,566 @@
+openapi: 3.0.0
+info:
+  title: Snowflake Cortex Analyst API
+  version: 2.0.0
+  description: 'Snowflake Cortex Analyst — natural language to SQL. Endpoints: sendMessage, feedback, verifiedQuerySuggestions,
+    fastGeneration, preSelection, filtersAndMetricsSuggestions, agenticOptimizations, token.'
+  contact:
+    name: Snowflake, Inc.
+    url: https://snowflake.com
+    email: support@snowflake.com
+servers:
+- url: https://{account}.snowflakecomputing.com
+  description: Snowflake account endpoint
+  variables:
+    account:
+      default: MDTPLC-AWSUSE1P1
+      description: Snowflake account identifier (e.g. MDTPLC-AWSUSE1P1). No '.snowflakecomputing.com' suffix.
+      x-ms-connection-parameter:
+        name: account
+        uiDefinition:
+          displayName: Snowflake Account
+          description: Your Snowflake account identifier (e.g. MDTPLC-AWSUSE1P1)
+          tooltip: Find under Admin > Accounts or run SELECT CURRENT_ACCOUNT() in Snowflake
+          constraints:
+            required: 'true'
+security:
+- SnowflakeOAuth:
+  - session:role:DEV_FDH_PROJ_MGMT_RW
+tags: []
+paths:
+  /api/v2/cortex/analyst/feedback:
+    post:
+      operationId: analyst_sendFeedback
+      tags:
+      - cortex-analyst
+      description: Send a user feedback of Cortex Analyst response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Response
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+    parameters:
+    - &id001
+      $ref: '#/components/parameters/SnowflakeAuthorizationTokenType'
+    - &id002
+      $ref: '#/components/parameters/SnowflakeRole'
+    - &id003
+      $ref: '#/components/parameters/SnowflakeWarehouse'
+    - &id004
+      $ref: '#/components/parameters/SnowflakeDatabase'
+    - &id005
+      $ref: '#/components/parameters/SnowflakeSchema'
+  /api/v2/cortex/analyst/message:
+    post:
+      operationId: analyst_sendMessage
+      tags:
+      - cortex-analyst
+      summary: Send a data question to the Cortex Analyst
+      description: Send a data question to the Cortex Analyst
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+            text/event-stream:
+              schema:
+                type: string
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Send a data question to the Cortex Analyst
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/cortex/analyst/verified-query-suggestions:
+    post:
+      operationId: analyst_generateVerifiedQuerySuggestions
+      tags:
+      - cortex-analyst
+      summary: Generate VQ suggestions for a semantic model
+      description: Generate VQ suggestions for a semantic model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Generate VQ suggestions for a semantic model
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/cortex/analyst/fast-generation:
+    post:
+      operationId: analyst_fastGeneration
+      tags:
+      - cortex-analyst
+      summary: Rapidly generate a semantic model given source material
+      description: Provides real-time suggestions for improving a given semantic model via a streaming response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK. Streaming suggestions.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: 'Server-Sent Events stream. Each event''s data payload will be a JSON representation of a `FastGenerationResponse`
+                  object.
+
+                  Events include:
+
+                  - `response`: Contains a `FastGenerationResponse` payload.
+
+                  - `error`: Contains a `StreamingError` payload if an error occurs during streaming.
+
+                  - `done`: Contains the string payload "done"'
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Rapidly generate a semantic model given source material
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/cortex/analyst/pre-selection:
+    post:
+      operationId: analyst_preSelection
+      tags:
+      - cortex-analyst
+      summary: Retrieve relevant table information from input data for semantic model generation
+      description: Retrieve relevant table information from input data for semantic model generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Retrieve relevant table information from input data for semantic model generation
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/cortex/analyst/filters-and-metrics-suggestions:
+    post:
+      operationId: analyst_generateFiltersAndMetricsSuggestions
+      tags:
+      - cortex-analyst
+      summary: Generate filters, facts, and metrics suggestions for a semantic model
+      description: Generate suggestions for filters, facts, and metrics on a semantic view/model.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Generate filters, facts, and metrics suggestions for a semantic model
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/cortex/analyst/agentic-optimizations:
+    post:
+      operationId: analyst_listAgenticOptimizations
+      tags:
+      - cortex-analyst
+      summary: List all agentic optimization runs for a given base model
+      description: List all agentic optimization runs for a given base model
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK. Retrieved optimizations.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: List all agentic optimization runs for a given base model
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/cortex/analyst/agentic-optimization:
+    get:
+      operationId: analyst_getAgenticOptimization
+      tags:
+      - cortex-analyst
+      summary: Get the status and state of a specified agentic optimization run
+      description: Get the status and state of a specified agentic optimization run
+      parameters:
+      - name: optimization_name
+        in: query
+        description: The fully-qualified name of the optimization to retrieve.
+        required: true
+        schema:
+          type: string
+        x-ms-summary: Optimization Name
+      responses:
+        '200':
+          description: OK. Retrieved optimization.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Get the status and state of a specified agentic optimization run
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+  /api/v2/cortex/analyst/token:
+    get:
+      operationId: analyst_getScopedToken
+      summary: Internal endpoint to exchange a Cortex Analyst Oauth token
+      description: Internal endpoint to exchange a Cortex Analyst Oauth token
+      tags:
+      - cortex-analyst
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: Response
+        '401':
+          description: Response
+        '403':
+          description: Response
+        '404':
+          description: Response
+        '405':
+          description: Response
+        '429':
+          description: Response
+        '500':
+          description: Response
+        '503':
+          description: Response
+        '504':
+          description: Response
+      x-ms-summary: Internal endpoint to exchange a Cortex Analyst Oauth token
+    parameters:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    - *id005
+components:
+  securitySchemes:
+    SnowflakeOAuth:
+      type: oauth2
+      description: 'Snowflake OAuth 2.0 Authorization Code. Configure client ID/secret from your Snowflake OAuth integration.
+        Scope: session:role:<ROLE>.'
+      flows:
+        authorizationCode:
+          authorizationUrl: https://orgname-accountname.snowflakecomputing.com/oauth/authorize
+          tokenUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-request
+          refreshUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-request
+          x-ms-authorization-url: https://{account}.snowflakecomputing.com/oauth/authorize
+          x-ms-token-url: https://{account}.snowflakecomputing.com/oauth/token-request
+          x-ms-refresh-url: https://{account}.snowflakecomputing.com/oauth/token-request
+          x-ms-revoke-url: https://{account}.snowflakecomputing.com/oauth/token-revoke
+          x-tokenRevocationUrl: https://orgname-accountname.snowflakecomputing.com/oauth/token-revoke
+          scopes:
+            session:role:PUBLIC: Access Snowflake with the PUBLIC role
+          x-ms-connection-parameter:
+            name: token
+            uiDefinition:
+              displayName: OAuth Scope
+              description: 'Snowflake session scope. Format: session:role:<ROLE_NAME>'
+              tooltip: Enter the role you want to use, e.g. session:role:MY_ROLE
+              constraints:
+                required: 'true'
+  parameters:
+    SnowflakeAuthorizationTokenType:
+      name: X-Snowflake-Authorization-Token-Type
+      in: header
+      required: true
+      description: Snowflake authorization token type. For OAuth use OAUTH; for PAT use PROGRAMMATIC_ACCESS_TOKEN.
+      x-ms-visibility: advanced
+      x-ms-summary: Token Type
+      schema:
+        type: string
+        enum:
+        - OAUTH
+        - PROGRAMMATIC_ACCESS_TOKEN
+        - KEYPAIR_JWT
+        default: OAUTH
+    SnowflakeRole:
+      name: X-Snowflake-Role
+      in: header
+      required: false
+      description: Snowflake role to use for the request.
+      x-ms-visibility: advanced
+      x-ms-summary: Role
+      schema:
+        type: string
+        default: DEV_FDH_PROJ_MGMT_RW
+      x-ms-connection-parameter:
+        name: role
+        uiDefinition:
+          displayName: Default Role
+          description: Default role sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeWarehouse:
+      name: X-Snowflake-Warehouse
+      in: header
+      required: false
+      description: Snowflake warehouse to use.
+      x-ms-visibility: advanced
+      x-ms-summary: Warehouse
+      schema:
+        type: string
+        default: AGENT_WH
+      x-ms-connection-parameter:
+        name: warehouse
+        uiDefinition:
+          displayName: Default Warehouse
+          description: Default warehouse sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeDatabase:
+      name: X-Snowflake-Database
+      in: header
+      required: false
+      description: Default Snowflake database context.
+      x-ms-visibility: advanced
+      x-ms-summary: Default Database
+      schema:
+        type: string
+        default: DEV_FDH_DB
+      x-ms-connection-parameter:
+        name: database
+        uiDefinition:
+          displayName: Default Database
+          description: Default database sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+    SnowflakeSchema:
+      name: X-Snowflake-Schema
+      in: header
+      required: false
+      description: Default Snowflake schema context.
+      x-ms-visibility: advanced
+      x-ms-summary: Default Schema
+      schema:
+        type: string
+        default: PROJ_MGMT
+      x-ms-connection-parameter:
+        name: schema
+        uiDefinition:
+          displayName: Default Schema
+          description: Default schema sent with every request unless overridden per-call.
+          constraints:
+            required: 'false'
+  schemas: {}
