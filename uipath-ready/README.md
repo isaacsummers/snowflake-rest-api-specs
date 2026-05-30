@@ -26,7 +26,7 @@ Pre-built UiPath connector packages for the Snowflake REST API (Cortex, SQL, Age
 - **v2** — Initial working connector (orgname-accountname path fix, OAuth URLs)
 
 ## Build scripts
-See `../build/` for the Python build scripts used to generate each version.
+See `../uipath-build/` for the Python build scripts used to generate each version.
 
 ## Updating from upstream
 \`\`\`bash
